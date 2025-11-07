@@ -1,0 +1,190 @@
+__________________________
+class for book
+___________________________
+public class Book {
+    String name;
+
+    public Book(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+________________________
+class for clinte and stack books
+_________________________
+import java.util.Stack;
+
+public class Customer {
+    // كل عميل لديه مكدس كتب خاص به
+    Stack<Book> bookStack;
+
+    public Customer() {
+        this.bookStack = new Stack<>();
+    }
+
+    // إضافة كتاب إلى أعلى المكدس
+    public void addBook(Book book) {
+        this.bookStack.push(book);
+    }
+
+    // سحب (إرجاع) كتاب من أعلى المكدس
+    public Book returnBook() {
+        if (!this.bookStack.isEmpty()) {
+            return this.bookStack.pop();
+        }
+        return null;
+    }
+
+    // ميثود مساعدة للحصول على المكدس لغرض العرض
+    public Stack<Book> getBookStack() {
+        return this.bookStack;
+    }
+}
+________________________
+class for queue of clinte
+_________________________
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+import java.util.Iterator;
+
+public class Library {
+    // طابور من العملاء، يتم تنفيذه باستخدام LinkedList
+    Queue<Customer> customerQueue;
+
+    public Library() {
+        this.customerQueue = new LinkedList<>();
+    }
+
+    /**
+     * Enqueue: إضافة عميل إلى نهاية الطابور.
+     */
+    public void enqueueCustomer(Customer customer) {
+        customerQueue.add(customer);
+    }
+
+    /**
+     * Dequeue: إزالة عميل من بداية الطابور.
+     */
+    public Customer dequeueCustomer() {
+        if (!customerQueue.isEmpty()) {
+            return customerQueue.poll();
+        }
+        return null;
+    }
+
+    /**
+     * سحب (Pop) عدد معين من الكتب من عميل معين.
+     * @param customerNumber رقم العميل في الطابور (يبدأ من 1).
+     * @param times عدد الكتب المراد سحبها.
+     */
+    public void popBookFromCustomer(int customerNumber, int times) {
+        if (customerNumber <= 0 || customerNumber > customerQueue.size()) {
+            System.out.println("Invalid customer number.");
+            return;
+        }
+
+        // للحصول على العميل رقم N من الطابور، يجب المرور عليهم
+        Iterator<Customer> iterator = customerQueue.iterator();
+        Customer targetCustomer = null;
+        for (int i = 0; i < customerNumber; i++) {
+            targetCustomer = iterator.next();
+        }
+
+        // تنفيذ عمليات السحب (Pop)
+        if (targetCustomer != null) {
+            for (int i = 0; i < times; i++) {
+                Book returnedBook = targetCustomer.returnBook();
+                if (returnedBook != null) {
+                    System.out.println("  Customer " + customerNumber + " returned: " + returnedBook.name);
+                } else {
+                    System.out.println("  Customer " + customerNumber + "'s stack is empty.");
+                    break;
+                }
+            }
+        }
+    }
+
+    public void displayQueue() {
+        System.out.println("--- Current Customer Queue ---");
+        if (customerQueue.isEmpty()) {
+            System.out.println("The queue is empty.");
+            return;
+        }
+
+        int customerNumber = 1;
+        // المرور على الطابور لعرض كل عميل
+        for (Customer customer : customerQueue) {
+            System.out.println("Customer " + customerNumber + ":");
+            Stack<Book> stack = customer.getBookStack();
+            
+            if (stack.isEmpty()) {
+                System.out.println("  [Empty]");
+            } else {
+                for (int i = 0; i < stack.size(); i++) {
+                    System.out.println("  - " + stack.get(i).name);
+                }
+            }
+            customerNumber++;
+        }
+        System.out.println("---------------------------------");
+    }
+
+    /**
+     */
+    public static void main(String[] args) {
+        Library library = new Library();
+
+        // --- الحالة الأولية 1) ---
+        Customer c1 = new Customer();
+        c1.addBook(new Book("Design Patterns"));
+        c1.addBook(new Book("The Pragmatic Programmer"));
+        c1.addBook(new Book("Clean Code")); // أعلى المكدس
+
+        Customer c2 = new Customer();
+        c2.addBook(new Book("Neuromancer"));
+        c2.addBook(new Book("Hyperion"));
+        c2.addBook(new Book("Foundation"));
+        c2.addBook(new Book("Dune")); // أعلى المكدس
+
+        Customer c3 = new Customer();
+        c3.addBook(new Book("The Silk Roads"));
+        c3.addBook(new Book("Guns, Germs, and Steel"));
+        c3.addBook(new Book("Sapiens: A Brief History of Humankind")); // أعلى المكدس
+
+        library.enqueueCustomer(c1);
+        library.enqueueCustomer(c2);
+        library.enqueueCustomer(c3);
+
+        System.out.println("Initial State (Matches Image 1):");
+        library.displayQueue();
+
+        // --- بعد الحذف (Dequeue)  2) ---
+        System.out.println("\nDequeuing Customer 1...");
+        library.dequeueCustomer();
+        System.out.println("State After Dequeue (Matches Image 2):");
+        library.displayQueue();
+
+        // --- بعد الإدراج (Enqueue) (  3) ---
+        System.out.println("\nEnqueuing new customer...");
+        Customer c4 = new Customer();
+        c4.addBook(new Book("Resep Ayam Goyeng Upin Ipin"));
+        c4.addBook(new Book("Timun Mas"));
+        c4.addBook(new Book("Tangkuban Perahu")); // أعلى المكدس
+        library.enqueueCustomer(c4);
+        System.out.println("State After Enqueue (Matches Image 3):");
+        library.displayQueue();
+
+        // --- بعد السحب (Pop) (  4) ---
+        System.out.println("\nPopping 2 books from Customer 1 (as per text instruction)...");
+        // في هذه المرحلة، العميل 1 هو (c2) ومكدسه هو [Neuromancer, Hyperion, Foundation, Dune]
+        // السحب مرتين سيزيل "Dune" ثم "Foundation".
+        library.popBookFromCustomer(1, 2); 
+        System.out.println("State After Popping Twice:");
+        library.displayQueue();
+    }
+}
